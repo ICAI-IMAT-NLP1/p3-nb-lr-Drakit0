@@ -19,7 +19,16 @@ def read_sentiment_examples(infile: str) -> List[SentimentExample]:
         A list of SentimentExample objects parsed from the file.
     """
     # TODO: Open the file, go line by line, separate sentence and label, tokenize the sentence and create SentimentExample object
-    examples: List[SentimentExample] = None
+    examples: List[SentimentExample] = []
+    with open(infile, "r") as file:
+        raw_file = file.read()
+        
+    cleaned_file = raw_file.replace(".", "").replace(",", "").replace(":", "").replace(";", "")
+    lines = cleaned_file.split("\n")
+    processed_lines = [line for line in lines if len(line) > 0]
+    
+    examples = [SentimentExample(line.split("\t")[0].split(" "), int(line.split("\t")[-1])) for line in processed_lines]
+    
     return examples
 
 
@@ -36,7 +45,17 @@ def build_vocab(examples: List[SentimentExample]) -> Dict[str, int]:
         Dict[str, int]: A dictionary representing the vocabulary, where each word is mapped to a unique index.
     """
     # TODO: Count unique words in all the examples from the training set
-    vocab: Dict[str, int] = None
+    vocab: Dict[str, int] = {}
+    
+    index = 0
+    
+    for example in examples:
+        for word in example.words:
+            if word not in vocab.keys():
+                
+                vocab[word] = index
+                
+                index += 1
 
     return vocab
 
@@ -57,6 +76,15 @@ def bag_of_words(
         torch.Tensor: A tensor representing the bag-of-words vector.
     """
     # TODO: Converts list of words into BoW, take into account the binary vs full
-    bow: torch.Tensor = None
+    bow: torch.Tensor = torch.zeros(len(vocab.keys()))
+    
+    for word in text:
+        if word in vocab.keys():
+            
+            if  not binary:
+                bow[vocab[word]] += 1
+                
+            else:
+                bow[vocab[word]] = 1
 
     return bow

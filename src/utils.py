@@ -90,6 +90,21 @@ def evaluate_classification(predictions: torch.Tensor, labels: torch.Tensor) -> 
     Returns:
         dict: A dictionary containing the calculated metrics.
     """
-    metrics: Dict[str, float] = None
+    # Confussion matrix
+    tp = torch.sum((predictions == 1) & (labels == 1)).item()
+    tn = torch.sum((predictions == 0) & (labels == 0)).item()
+    fp = torch.sum((predictions == 1) & (labels == 0)).item()
+    fn = torch.sum((predictions == 0) & (labels == 1)).item()
+    
+    # Error metrics
+    accuracy = (tp + tn)/(tp + tn + fp + fn)
+    precision = tp/(tp + fp)
+    recall = tp/(tp + fn)
+    f1_score = 2 * (precision*recall) / (precision + recall)
+    
+    metrics: Dict[str, float] = {"accuracy":accuracy,
+                                 "precision":precision,
+                                 "recall":recall,
+                                 "f1_score":f1_score}
 
     return metrics
